@@ -1,6 +1,6 @@
 package at.blvckbytes.paper_cm.config;
 
-import at.blvckbytes.component_markup.util.LoggerProvider;
+import at.blvckbytes.component_markup.util.logging.GlobalLogger;
 import at.blvckbytes.paper_cm.config.type.CMValueSerializer;
 import at.blvckbytes.paper_cm.config.type.ExpressionValueSerializer;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
@@ -14,6 +14,7 @@ public class ConfigKeeper<ConfigType extends PostProcessedConfig> {
 
   private final File configFile;
   private final Supplier<ConfigType> creator;
+  private final ConfigLogger logger;
   private ConfigType config;
 
   private final Map<ReloadPriority, List<Runnable>> reloadListenersByPriority;
@@ -21,6 +22,7 @@ public class ConfigKeeper<ConfigType extends PostProcessedConfig> {
   public ConfigKeeper(File configFile, Supplier<ConfigType> creator) {
     this.creator = creator;
     this.configFile = configFile;
+    this.logger = new ConfigLogger(configFile.getPath());
     this.reloadListenersByPriority = new HashMap<>();
   }
 
@@ -55,9 +57,8 @@ public class ConfigKeeper<ConfigType extends PostProcessedConfig> {
 
       var errorScreens = new ArrayList<List<String>>();
       var lineNumberResolver = new LineNumberResolver(configFile);
-      var filePath = configFile.getPath();
 
-      config.postProcess(new PostProcessState(new Stack<>(), lineNumberResolver, errorScreens, filePath));
+      config.postProcess(new PostProcessState(new Stack<>(), lineNumberResolver, errorScreens, logger));
 
       if (errorScreens.isEmpty()) {
         for (ReloadPriority priority : ReloadPriority.VALUES_IN_CALL_ORDER) {
@@ -73,19 +74,19 @@ public class ConfigKeeper<ConfigType extends PostProcessedConfig> {
         return false;
       }
 
-      LoggerProvider.log(Level.SEVERE, "There were errors while trying to load " + filePath + "; the line-numbers below reference it.", false);
+      GlobalLogger.log(Level.SEVERE, "There were errors while trying to load " + configFile.getPath() + "; the following line-numbers point at the issue.", false);
 
       for (var i = 0; i < errorScreens.size(); ++i) {
         if (i != 0)
-          LoggerProvider.log(Level.SEVERE, " ", false);
+          GlobalLogger.log(Level.SEVERE, " ", false);
 
         for (var line : errorScreens.get(i))
-          LoggerProvider.log(Level.SEVERE, line, false);
+          GlobalLogger.log(Level.SEVERE, line, false);
       }
 
       return true;
     } catch (Throwable e) {
-      LoggerProvider.log(Level.SEVERE, "An error occurred while trying to reload the config", e);
+      GlobalLogger.log(Level.SEVERE, "An error occurred while trying to reload the config", e);
       return true;
     }
   }

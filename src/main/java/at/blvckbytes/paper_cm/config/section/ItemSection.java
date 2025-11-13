@@ -3,7 +3,6 @@ package at.blvckbytes.paper_cm.config.section;
 import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.util.DeepIterator;
-import at.blvckbytes.component_markup.util.ErrorScreen;
 import at.blvckbytes.component_markup.util.InputView;
 import at.blvckbytes.paper_cm.config.type.CMValue;
 import at.blvckbytes.paper_cm.config.PostProcessedConfig;
@@ -70,7 +69,7 @@ public class ItemSection extends PostProcessedConfig {
     var maxSlot = inventory.getSize() - 1;
 
     if (slot < 0 || slot > maxSlot) {
-      logRuntimeErrorScreen(ErrorScreen.make(view, "Slot cannot be less than zero or greater than " + maxSlot + ": \"" + slot + "\""));
+      logger.logErrorScreen(view, "Slot cannot be less than zero or greater than " + maxSlot + ": \"" + slot + "\"");
       return false;
     }
 
@@ -103,7 +102,7 @@ public class ItemSection extends PostProcessedConfig {
       try {
         return Material.valueOf(value);
       } catch (IllegalArgumentException e) {
-        logRuntimeErrorScreen(ErrorScreen.make(view, "Invalid item material-constant: \"" + value + "\""));
+        logger.logErrorScreen(view, "Invalid item material-constant: \"" + value + "\"");
         return null;
       }
     }, DEFAULT_TYPE);
@@ -112,7 +111,7 @@ public class ItemSection extends PostProcessedConfig {
       var numericValue = environment.getValueInterpreter().asLong(value);
 
       if (numericValue <= 0) {
-        logRuntimeErrorScreen(ErrorScreen.make(view, "Item amount cannot be less than or equal to zero: \"" + value + "\""));
+        logger.logErrorScreen(view, "Item amount cannot be less than or equal to zero: \"" + value + "\"");
         return DEFAULT_AMOUNT;
       }
 

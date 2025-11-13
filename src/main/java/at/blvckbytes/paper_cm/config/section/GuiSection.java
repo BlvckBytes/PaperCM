@@ -2,7 +2,6 @@ package at.blvckbytes.paper_cm.config.section;
 
 import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
-import at.blvckbytes.component_markup.util.ErrorScreen;
 import at.blvckbytes.paper_cm.config.type.CMValue;
 import at.blvckbytes.paper_cm.config.PostProcessedConfig;
 import at.blvckbytes.paper_cm.config.type.ExpressionValue;
@@ -44,7 +43,7 @@ public abstract class GuiSection<ItemSectionType extends PostProcessedConfig, Se
       var numericValue = environment.getValueInterpreter().asLong(value);
 
       if (numericValue <= 0 || numericValue > 6) {
-        logRuntimeErrorScreen(ErrorScreen.make(view, "Row-count cannot be less than or equal to zero or greater than 6: \"" + value + "\""));
+        logger.logErrorScreen(view, "Row-count cannot be less than or equal to zero or greater than 6: \"" + value + "\"");
         return DEFAULT_ROWS;
       }
 

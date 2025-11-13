@@ -1,6 +1,5 @@
 package at.blvckbytes.paper_cm.config.type;
 
-import at.blvckbytes.component_markup.constructor.SlotContext;
 import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.markup.ast.node.MarkupNode;
@@ -24,8 +23,6 @@ import java.util.function.BiFunction;
 
 public class CMValue extends PostProcessedConfig {
 
-  private static final SlotContext CHAT_CONTEXT = PlainStringComponentConstructor.INSTANCE.getSlotContext(SlotType.CHAT);
-
   public final @NotNull Object rawValue;
   public transient MarkupNode value;
 
@@ -44,6 +41,8 @@ public class CMValue extends PostProcessedConfig {
 
   @Override
   public void postProcess(PostProcessState postProcessState) {
+    super.postProcess(postProcessState);
+
     var lineNumbers = postProcessState.getCurrentLineNumbers();
 
     if (!(rawValue instanceof String || rawValue instanceof Number || rawValue instanceof Boolean)) {
@@ -62,11 +61,11 @@ public class CMValue extends PostProcessedConfig {
   }
 
   public Component interpretComponent(InterpretationEnvironment environment, SlotType slotType) {
-    return MarkupInterpreter.interpret(AdventureComponentConstructor.INSTANCE, environment, AdventureComponentConstructor.INSTANCE.getSlotContext(slotType), value).getFirst();
+    return MarkupInterpreter.interpret(value, slotType, environment, AdventureComponentConstructor.INSTANCE, logger).getFirst();
   }
 
   public List<Component> interpretComponents(InterpretationEnvironment environment, SlotType slotType) {
-    return MarkupInterpreter.interpret(AdventureComponentConstructor.INSTANCE, environment, AdventureComponentConstructor.INSTANCE.getSlotContext(slotType), value);
+    return MarkupInterpreter.interpret(value, slotType, environment, AdventureComponentConstructor.INSTANCE, logger);
   }
 
   public static <T> @NotNull T evaluatePlain(
@@ -78,7 +77,7 @@ public class CMValue extends PostProcessedConfig {
     if (markupValue == null || markupValue.value == null)
       return nullFallback;
 
-    var text = MarkupInterpreter.interpret(PlainStringComponentConstructor.INSTANCE, environment, CHAT_CONTEXT, markupValue.value).getFirst();
+    var text = MarkupInterpreter.interpret(markupValue.value, SlotType.CHAT, environment, PlainStringComponentConstructor.INSTANCE, markupValue.logger).getFirst();
 
     if (text.isBlank())
       return nullFallback;

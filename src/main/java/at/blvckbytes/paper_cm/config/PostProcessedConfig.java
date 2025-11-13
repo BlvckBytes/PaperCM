@@ -1,26 +1,16 @@
 package at.blvckbytes.paper_cm.config;
 
-import at.blvckbytes.component_markup.util.LoggerProvider;
+import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 import eu.okaeri.configs.OkaeriConfig;
 
 import java.util.List;
-import java.util.logging.Level;
 
 public abstract class PostProcessedConfig extends OkaeriConfig {
 
-  // TODO: I should introduce the notion of a "config-scoped logger", since all of the loggers
-  //       within the interpreters are also missing this informative preamble.
-  protected String configFilePath;
-
-  public void logRuntimeErrorScreen(List<String> lines) {
-    LoggerProvider.log(Level.SEVERE, "There was an error while working with data from the config at " + configFilePath + "; the line-numbers below reference it.", false);
-
-    for (var line : lines)
-      LoggerProvider.log(Level.SEVERE, line, false);
-  }
+  protected InterpreterLogger logger;
 
   public void postProcess(PostProcessState postProcessState) {
-    configFilePath = postProcessState.configFilePath();
+    logger = postProcessState.logger();
 
     getDeclaration().getFields().forEach(field -> {
       var value = field.getValue();

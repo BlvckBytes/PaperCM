@@ -36,6 +36,8 @@ public class ExpressionValue extends PostProcessedConfig {
 
   @Override
   public void postProcess(PostProcessState postProcessState) {
+    super.postProcess(postProcessState);
+
     var lineNumbers = postProcessState.getCurrentLineNumbers();
 
     if (!(rawValue instanceof String || rawValue instanceof Number || rawValue instanceof Boolean)) {
@@ -61,7 +63,7 @@ public class ExpressionValue extends PostProcessedConfig {
     if (expressionValue == null || expressionValue.value == null)
       return;
 
-    var rawValue = ExpressionInterpreter.interpret(expressionValue.value, environment);
+    var rawValue = ExpressionInterpreter.interpret(expressionValue.value, environment, expressionValue.logger);
 
     if (rawValue == null)
       return;
@@ -78,7 +80,7 @@ public class ExpressionValue extends PostProcessedConfig {
     if (expressionValue == null || expressionValue.value == null)
       return nullFallback;
 
-    var rawValue = ExpressionInterpreter.interpret(expressionValue.value, environment);
+    var rawValue = ExpressionInterpreter.interpret(expressionValue.value, environment, expressionValue.logger);
 
     if (rawValue == null)
       return nullFallback;
