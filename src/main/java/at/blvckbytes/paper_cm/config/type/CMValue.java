@@ -1,4 +1,4 @@
-package at.blvckbytes.paper_cm.config;
+package at.blvckbytes.paper_cm.config.type;
 
 import at.blvckbytes.component_markup.constructor.SlotContext;
 import at.blvckbytes.component_markup.constructor.SlotType;
@@ -10,6 +10,8 @@ import at.blvckbytes.component_markup.markup.parser.MarkupParseException;
 import at.blvckbytes.component_markup.markup.parser.MarkupParser;
 import at.blvckbytes.component_markup.util.ErrorScreen;
 import at.blvckbytes.component_markup.util.InputView;
+import at.blvckbytes.paper_cm.config.PostProcessState;
+import at.blvckbytes.paper_cm.config.PostProcessedConfig;
 import at.blvckbytes.paper_cm.constructor.AdventureComponentConstructor;
 import at.blvckbytes.paper_cm.constructor.PlainStringComponentConstructor;
 import net.kyori.adventure.text.Component;

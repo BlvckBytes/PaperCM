@@ -1,6 +1,8 @@
 package at.blvckbytes.paper_cm.config;
 
 import at.blvckbytes.component_markup.util.LoggerProvider;
+import at.blvckbytes.paper_cm.config.type.CMValueSerializer;
+import at.blvckbytes.paper_cm.config.type.ExpressionValueSerializer;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
 
 import java.io.File;
@@ -10,8 +12,8 @@ import java.util.logging.Level;
 
 public class ConfigKeeper<ConfigType extends PostProcessedConfig> {
 
-  public final File configFile;
-  public final Supplier<ConfigType> creator;
+  private final File configFile;
+  private final Supplier<ConfigType> creator;
   private ConfigType config;
 
   private final Map<ReloadPriority, List<Runnable>> reloadListenersByPriority;
@@ -42,7 +44,10 @@ public class ConfigKeeper<ConfigType extends PostProcessedConfig> {
         opt.configurer(new YamlSnakeYamlConfigurer());
         opt.bindFile(configFile);
         opt.removeOrphans(true);
-        opt.serdes(it -> it.register(new CMValueSerializer()));
+        opt.serdes(it -> {
+          it.register(new CMValueSerializer());
+          it.register(new ExpressionValueSerializer());
+        });
       });
 
       config.saveDefaults();
@@ -50,8 +55,9 @@ public class ConfigKeeper<ConfigType extends PostProcessedConfig> {
 
       var errorScreens = new ArrayList<List<String>>();
       var lineNumberResolver = new LineNumberResolver(configFile);
+      var filePath = configFile.getPath();
 
-      config.postProcess(new PostProcessState(new Stack<>(), lineNumberResolver, errorScreens));
+      config.postProcess(new PostProcessState(new Stack<>(), lineNumberResolver, errorScreens, filePath));
 
       if (errorScreens.isEmpty()) {
         for (ReloadPriority priority : ReloadPriority.VALUES_IN_CALL_ORDER) {
@@ -66,6 +72,8 @@ public class ConfigKeeper<ConfigType extends PostProcessedConfig> {
 
         return false;
       }
+
+      LoggerProvider.log(Level.SEVERE, "There were errors while trying to load " + filePath + "; the line-numbers below reference it.", false);
 
       for (var i = 0; i < errorScreens.size(); ++i) {
         if (i != 0)
