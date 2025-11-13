@@ -2,6 +2,7 @@ package at.blvckbytes.paper_cm.config.section;
 
 import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
+import at.blvckbytes.component_markup.util.DeepIterator;
 import at.blvckbytes.component_markup.util.ErrorScreen;
 import at.blvckbytes.component_markup.util.InputView;
 import at.blvckbytes.paper_cm.config.type.CMValue;
@@ -16,6 +17,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Iterator;
 import java.util.UUID;
 import java.util.function.IntConsumer;
 
@@ -87,15 +89,15 @@ public class ItemSection extends PostProcessedConfig {
 
     ItemStack item = null;
 
-    for (var rawSlot : rawSlots) {
+    for (Iterator<Long> slotIterator = new DeepIterator<>(rawSlots, environment.getValueInterpreter()::asLong); slotIterator.hasNext();) {
+      var slotNumber = slotIterator.next();
+
       if (item == null)
         item = build(environment);
 
-      var slotNumber = environment.getValueInterpreter().asLong(rawSlot);
-
-      if (setItemOrLog(inventory, item, (int) slotNumber, view)) {
+      if (setItemOrLog(inventory, item, slotNumber.intValue(), view)) {
         if (slotConsumer != null)
-          slotConsumer.accept((int) slotNumber);
+          slotConsumer.accept(slotNumber.intValue());
       }
     }
   }
