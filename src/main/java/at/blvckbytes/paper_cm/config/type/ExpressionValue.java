@@ -13,6 +13,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.StringJoiner;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 public class ExpressionValue extends PostProcessedConfig {
 
@@ -51,10 +53,41 @@ public class ExpressionValue extends PostProcessedConfig {
     }
   }
 
-  public static @Nullable Object evaluateRaw(@Nullable ExpressionValue expressionValue, InterpretationEnvironment environment) {
+  public static void consumeRaw(
+    @Nullable ExpressionValue expressionValue,
+    InterpretationEnvironment environment,
+    BiConsumer<InputView, Object> consumer
+  ) {
     if (expressionValue == null || expressionValue.value == null)
-      return null;
+      return;
 
-    return ExpressionInterpreter.interpret(expressionValue.value, environment);
+    var rawValue = ExpressionInterpreter.interpret(expressionValue.value, environment);
+
+    if (rawValue == null)
+      return;
+
+    consumer.accept(expressionValue.value.getFirstMemberPositionProvider(), rawValue);
+  }
+
+  public static <T> @NotNull T evaluateRaw(
+    @Nullable ExpressionValue expressionValue,
+    InterpretationEnvironment environment,
+    BiFunction<InputView, Object, @Nullable T> mapper,
+    @NotNull T nullFallback
+  ) {
+    if (expressionValue == null || expressionValue.value == null)
+      return nullFallback;
+
+    var rawValue = ExpressionInterpreter.interpret(expressionValue.value, environment);
+
+    if (rawValue == null)
+      return nullFallback;
+
+    var mappedValue = mapper.apply(expressionValue.value.getFirstMemberPositionProvider(), rawValue);
+
+    if (mappedValue == null)
+      return nullFallback;
+
+    return mappedValue;
   }
 }

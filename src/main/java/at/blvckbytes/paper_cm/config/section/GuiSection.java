@@ -5,6 +5,7 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import at.blvckbytes.component_markup.util.ErrorScreen;
 import at.blvckbytes.paper_cm.config.type.CMValue;
 import at.blvckbytes.paper_cm.config.PostProcessedConfig;
+import at.blvckbytes.paper_cm.config.type.ExpressionValue;
 import eu.okaeri.configs.annotation.Exclude;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
@@ -16,7 +17,7 @@ public abstract class GuiSection<ItemSectionType extends PostProcessedConfig, Se
   private static final int DEFAULT_ROWS = 3;
 
   public @Nullable CMValue title;
-  public @Nullable CMValue rows;
+  public @Nullable ExpressionValue rows$;
 
   public ItemSectionType items;
 
@@ -34,12 +35,12 @@ public abstract class GuiSection<ItemSectionType extends PostProcessedConfig, Se
   }
 
   public Self rows(String... initialValue) {
-    this.rows = CMValue.ofLines(initialValue);
+    this.rows$ = ExpressionValue.ofLines(initialValue);
     return self();
   }
 
   public Inventory buildInventory(InterpretationEnvironment environment) {
-    int rowCount = CMValue.evaluatePlain(rows, environment, (view, value) -> {
+    int rowCount = ExpressionValue.evaluateRaw(rows$, environment, (view, value) -> {
       var numericValue = environment.getValueInterpreter().asLong(value);
 
       if (numericValue <= 0 || numericValue > 6) {
@@ -51,7 +52,7 @@ public abstract class GuiSection<ItemSectionType extends PostProcessedConfig, Se
     }, DEFAULT_ROWS);
 
     if (title != null)
-      return Bukkit.createInventory(null, rowCount * 9, title.interpretComponent(environment, SlotType.ITEM_NAME));
+      return Bukkit.createInventory(null, rowCount * 9, title.interpretComponent(environment, SlotType.INVENTORY_TITLE));
 
     return Bukkit.createInventory(null, rowCount * 9);
   }

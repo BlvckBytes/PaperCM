@@ -29,15 +29,15 @@ public class ItemSection extends PostProcessedConfig {
   @Exclude
   private static final Material DEFAULT_TYPE = Material.BARRIER;
 
-  public @Nullable CMValue amount;
+  public @Nullable ExpressionValue amount$;
   public @Nullable CMValue name;
   public @Nullable CMValue lore;
   public @Nullable CMValue material;
   public @Nullable CMValue textures;
-  public @Nullable ExpressionValue slot;
+  public @Nullable ExpressionValue slot$;
 
   public ItemSection amount(String... initialValue) {
-    this.amount = CMValue.ofLines(initialValue);
+    this.amount$ = ExpressionValue.ofLines(initialValue);
     return this;
   }
 
@@ -62,7 +62,7 @@ public class ItemSection extends PostProcessedConfig {
   }
 
   public ItemSection slot(String... initialValue) {
-    this.slot = ExpressionValue.ofLines(initialValue);
+    this.slot$ = ExpressionValue.ofLines(initialValue);
     return this;
   }
 
@@ -79,27 +79,23 @@ public class ItemSection extends PostProcessedConfig {
   }
 
   public void buildAndRenderInto(Inventory inventory, InterpretationEnvironment environment, @Nullable IntConsumer slotConsumer) {
-    var slotResult = ExpressionValue.evaluateRaw(slot, environment);
+    ExpressionValue.consumeRaw(slot$, environment, (view, value) -> {
+      var rawSlots = environment.getValueInterpreter().asList(value);
 
-    if (slotResult == null)
-      return;
+      ItemStack item = null;
 
-    var rawSlots = environment.getValueInterpreter().asList(slotResult);
-    var view = slot.value.getFirstMemberPositionProvider();
+      for (Iterator<Long> slotIterator = new DeepIterator<>(rawSlots, environment.getValueInterpreter()::asLong); slotIterator.hasNext();) {
+        var slotNumber = slotIterator.next();
 
-    ItemStack item = null;
+        if (item == null)
+          item = build(environment);
 
-    for (Iterator<Long> slotIterator = new DeepIterator<>(rawSlots, environment.getValueInterpreter()::asLong); slotIterator.hasNext();) {
-      var slotNumber = slotIterator.next();
-
-      if (item == null)
-        item = build(environment);
-
-      if (setItemOrLog(inventory, item, slotNumber.intValue(), view)) {
-        if (slotConsumer != null)
-          slotConsumer.accept(slotNumber.intValue());
+        if (setItemOrLog(inventory, item, slotNumber.intValue(), view)) {
+          if (slotConsumer != null)
+            slotConsumer.accept(slotNumber.intValue());
+        }
       }
-    }
+    });
   }
 
   public ItemStack build(InterpretationEnvironment environment) {
@@ -112,7 +108,7 @@ public class ItemSection extends PostProcessedConfig {
       }
     }, DEFAULT_TYPE);
 
-    var itemAmount = CMValue.evaluatePlain(amount, environment, (view, value) -> {
+    var itemAmount = ExpressionValue.evaluateRaw(amount$, environment, (view, value) -> {
       var numericValue = environment.getValueInterpreter().asLong(value);
 
       if (numericValue <= 0) {
