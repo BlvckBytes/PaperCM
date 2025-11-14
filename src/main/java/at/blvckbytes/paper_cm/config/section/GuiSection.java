@@ -39,6 +39,8 @@ public abstract class GuiSection<ItemSectionType extends PostProcessedConfig, Se
   }
 
   public Inventory buildInventory(InterpretationEnvironment environment) {
+    extendEnvironment(environment);
+
     int rowCount = ExpressionValue.evaluateRaw(rows$, environment, (view, value) -> {
       var numericValue = environment.getValueInterpreter().asLong(value);
 

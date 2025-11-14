@@ -1,6 +1,7 @@
 package at.blvckbytes.paper_cm.config;
 
 import at.blvckbytes.component_markup.util.logging.GlobalLogger;
+import at.blvckbytes.paper_cm.config.section.RootSection;
 import at.blvckbytes.paper_cm.config.type.CMValueSerializer;
 import at.blvckbytes.paper_cm.config.type.ExpressionValueSerializer;
 import eu.okaeri.configs.yaml.snakeyaml.YamlSnakeYamlConfigurer;
@@ -10,7 +11,7 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 
-public class ConfigKeeper<ConfigType extends PostProcessedConfig> {
+public class ConfigKeeper<ConfigType extends RootSection> {
 
   private final File configFile;
   private final Supplier<ConfigType> creator;

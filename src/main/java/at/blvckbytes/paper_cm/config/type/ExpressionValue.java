@@ -42,7 +42,7 @@ public class ExpressionValue extends PostProcessedConfig {
 
     if (!(rawValue instanceof String || rawValue instanceof Number || rawValue instanceof Boolean)) {
       var lineView = InputView.of(lineNumbers.keyLine(), lineNumbers.keyLineNumber());
-      postProcessState.errorScreens().add(ErrorScreen.make(lineView, 0, "Only supports strings, numbers or booleans"));
+      postProcessState.errorScreens.add(ErrorScreen.make(lineView, 0, "Only supports strings, numbers or booleans"));
       return;
     }
 
@@ -51,7 +51,7 @@ public class ExpressionValue extends PostProcessedConfig {
     try {
       value = ExpressionParser.parse(InputView.of(stringValue, lineNumbers.valueLineNumber()), null);
     } catch (ExpressionParseException e) {
-      postProcessState.errorScreens().add(e.makeErrorScreen());
+      postProcessState.errorScreens.add(e.makeErrorScreen());
     }
   }
 

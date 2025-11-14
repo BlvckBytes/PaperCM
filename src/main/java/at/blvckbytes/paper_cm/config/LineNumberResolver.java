@@ -33,8 +33,10 @@ public class LineNumberResolver {
     var currentNode = rootNode;
     Node lastKey = null;
 
-    partLoop: while (!pathParts.isEmpty()) {
-      var key = pathParts.removeFirst();
+    var remainingPathParts = new ArrayList<>(pathParts);
+
+    partLoop: while (!remainingPathParts.isEmpty()) {
+      var key = remainingPathParts.removeFirst();
 
       if (currentNode instanceof MappingNode mappingNode) {
         for (var nodeTuple : mappingNode.getValue()) {
@@ -49,7 +51,7 @@ public class LineNumberResolver {
           continue partLoop;
         }
 
-        throw new IllegalStateException("Could not locate path-part: \"" + key + "\"");
+        throw new IllegalStateException("Could not locate path-part \"" + key + "\" of path " + String.join(".", pathParts));
       }
 
       if (currentNode instanceof CollectionNode<?> collectionNode) {

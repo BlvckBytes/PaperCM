@@ -78,6 +78,8 @@ public class ItemSection extends PostProcessedConfig {
   }
 
   public void buildAndRenderInto(Inventory inventory, InterpretationEnvironment environment, @Nullable IntConsumer slotConsumer) {
+    extendEnvironment(environment);
+
     ExpressionValue.consumeRaw(slot$, environment, (view, value) -> {
       var rawSlots = environment.getValueInterpreter().asList(value);
 
@@ -98,6 +100,8 @@ public class ItemSection extends PostProcessedConfig {
   }
 
   public ItemStack build(InterpretationEnvironment environment) {
+    extendEnvironment(environment);
+
     var itemMaterial = CMValue.evaluatePlain(material, environment, (view, value) -> {
       try {
         return Material.valueOf(value);
