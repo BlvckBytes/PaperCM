@@ -4,6 +4,9 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import at.blvckbytes.component_markup.markup.interpreter.DirectFieldAccess;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class GlobalEnvironmentResolver implements DirectFieldAccess {
 
   public final InterpretationEnvironment environment;
@@ -18,5 +21,12 @@ public class GlobalEnvironmentResolver implements DirectFieldAccess {
       return environment.getVariableValue(rawIdentifier);
 
     return DirectFieldAccess.UNKNOWN_FIELD_SENTINEL;
+  }
+
+  @Override
+  public @Nullable Set<String> getAvailableFields() {
+    var knownNames = new HashSet<String>();
+    environment.forEachKnownName(knownNames::add);
+    return knownNames;
   }
 }
